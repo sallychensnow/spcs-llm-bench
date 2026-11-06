@@ -1,0 +1,44 @@
+version: 2
+
+name: LLM_BENCH_CONSOLE
+database: QWEN_MULTI_DB
+schema: QWEN_MULTI_SCH
+query_warehouse: QWEN_MULTI_MODEL_WH
+
+label: "LLM Bench Console"
+description: "One-click capacity benchmarking (latency, concurrency, token shape, cold start, replicas) for vLLM services on SPCS."
+icon: public/icon.svg
+
+ignore:
+  - node_modules
+  - .env*
+  - __pycache__
+  - "*.pyc"
+  - .next
+  - .git
+  - snowflake.log
+  - "*.tsbuildinfo"
+  - app.yml.builder
+  - __tests__
+
+install:
+  commands:
+    - ["npm", "ci", "--include=dev"]
+
+build:
+  commands:
+    - ["npm", "run", "build"]
+    # For standalone mode
+    - ["cp", "-r", ".next/static", ".next/standalone/.next/static"]
+    - ["cp", "-r", "public", ".next/standalone/public"]
+    # Avoid packaging extra node_modules since standalone includes its own
+    - ["rm", "-rf", "node_modules"]
+
+run:
+  command: ["node", ".next/standalone/server.js"]
+
+# Schema holding the bench backend (BENCH_TARGETS, BENCH_RUNS, BENCH_RUNNER task, ...).
+# The app's owning role must own or have full rights on these objects.
+environment_variables:
+  - name: BENCH_SCHEMA
+    value: "QWEN_MULTI_DB.QWEN_MULTI_SCH"

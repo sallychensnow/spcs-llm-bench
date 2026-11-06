@@ -1,0 +1,26 @@
+# Benchmark client job spec TEMPLATE (rendered by EXECUTE JOB SERVICE ... USING (...)).
+spec:
+  containers:
+  - name: bench
+    image: /llm_bench/bench/repo/vllm-bench:latest
+    env:
+      TEST: "{{ test }}"
+      RUN_ID: "{{ run_id }}"
+      REPLICAS: "{{ replicas }}"
+      BASE_URL: http://llm-poc:8000      # PoC service DNS name (same schema) — never prod
+      MODEL: <served-model-name>    # must equal --served-model-name of the PoC server
+      TOKENIZER: /models/<model-dir>
+      OUT_DIR: /results
+      CONCURRENCY_LEVELS: "{{ levels }}"
+    volumeMounts:
+    - name: models
+      mountPath: /models
+    - name: results
+      mountPath: /results
+    resources:
+      requests: {cpu: 2, memory: 8Gi}
+  volumes:
+  - name: models          # only tokenizer/config files are read by the client
+    source: "@llm_bench.bench.model_stage"
+  - name: results
+    source: "@llm_bench.bench.results_stage"

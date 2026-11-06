@@ -1,0 +1,29 @@
+# Generic bench client job (rendered by RUN_BENCH_JOB via SPECIFICATION_TEMPLATE_FILE ... USING).
+# Values arrive as JSON strings, so placeholders are not quoted here.
+# Every value comes from BENCH_TARGETS / BENCH_RUNS; nothing is environment-specific here.
+spec:
+  containers:
+  - name: bench
+    image: {{ image }}
+    command: ["bash", "/opt/bench/run_bench.sh"]
+    env:
+      TEST: {{ test }}
+      RUN_ID: {{ run_id }}
+      REPLICAS: {{ replicas }}
+      CONCURRENCY_LEVELS: {{ levels }}
+      MIN_PROMPTS: {{ min_prompts }}
+      BASE_URL: {{ base_url }}
+      MODEL: {{ model }}
+      TOKENIZER: {{ tokenizer_path }}
+      OUT_DIR: /results
+      COLD_START_PY: /opt/bench/cold_start.py
+    volumeMounts:
+    - {name: scripts, mountPath: /opt/bench}
+    - {name: models,  mountPath: /models}
+    - {name: results, mountPath: /results}
+    resources:
+      requests: {cpu: 2, memory: 8Gi}
+  volumes:
+  - {name: scripts, source: {{ scripts_stage }}}
+  - {name: models,  source: {{ tokenizer_stage }}}
+  - {name: results, source: {{ results_stage }}}
